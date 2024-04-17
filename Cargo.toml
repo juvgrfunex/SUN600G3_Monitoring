@@ -1,0 +1,17 @@
+[package]
+name = "solar_mon"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+csv = "1.1"
+chrono = "*"
+serde = {version = "*", features = ["derive"]}
+toml = "*"
+anyhow = "1.0.70"
+log = "0.4.17"
+rinfluxdb = "0.2.0"
+reqwest = "0.11.16"
+simple_logger = "4.1.0"

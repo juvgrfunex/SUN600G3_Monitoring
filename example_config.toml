@@ -1,0 +1,14 @@
+log_level = "info"
+
+[monitoring]
+influx_ip = "<influx_server_ip>"
+intervall_secs = 60
+database = "<databse_name>"
+
+
+[inverter.<name1>]
+ip = "<inverter_ip>"
+
+
+[inverter.<name2>]
+ip = "<inverter_ip>"
