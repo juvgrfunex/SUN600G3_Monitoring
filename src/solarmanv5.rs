@@ -1,5 +1,6 @@
 use std::io::prelude::*;
 use std::net::{SocketAddr, TcpStream};
+use anyhow::Context;
 
 pub(crate) struct SolarmanDevice {
     addr: std::net::IpAddr,
@@ -13,7 +14,7 @@ impl SolarmanDevice {
         addr: std::net::IpAddr,
         port: u16,
         timeout: std::time::Duration,
-    ) -> std::io::Result<Self> {
+    ) -> anyhow::Result<Self> {
         let mut device = SolarmanDevice {
             addr,
             port,
@@ -24,15 +25,15 @@ impl SolarmanDevice {
         Ok(device)
     }
 
-    fn create_connection(&self) -> std::io::Result<std::net::TcpStream> {
+    fn create_connection(&self) -> anyhow::Result<std::net::TcpStream> {
         let stream =
             TcpStream::connect_timeout(&SocketAddr::new(self.addr, self.port), self.timeout)?;
-        stream.set_read_timeout(Some(self.timeout))?;
-        stream.set_write_timeout(Some(self.timeout))?;
+        stream.set_read_timeout(Some(self.timeout)).context("Failed to set read timeout")?;
+        stream.set_write_timeout(Some(self.timeout)).context("failed to set write timeout")?;
         Ok(stream)
     }
 
-    fn detect_serial(&mut self) -> std::io::Result<()> {
+    fn detect_serial(&mut self) -> anyhow::Result<()> {
         let mut connection = self.create_connection()?;
         connection.write_all(
             &Request {
@@ -52,14 +53,14 @@ impl SolarmanDevice {
             .to_bytes(),
         )?;
 
-        let mut response_buffer = [0; 140];
-        connection.read_exact(&mut response_buffer)?;
-        let response = Response::from_bytes(&response_buffer);
+        let mut response_buffer = [0; 29];
+	connection.read_exact(&mut response_buffer).context("Failed reading serial detection response")?;
+	let response = Response::from_bytes(&response_buffer);
         self.logger_serial = response.header.logger_serial;
         Ok(())
     }
 
-    pub(crate) fn send_modbus_frame(&mut self, frame: &[u8]) -> std::io::Result<Vec<u8>> {
+    pub(crate) fn send_modbus_frame(&mut self, frame: &[u8]) -> anyhow::Result<Vec<u8>> {
         let mut connection = self.create_connection()?;
         let request = Request {
             header: RequestHeader {

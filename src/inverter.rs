@@ -17,13 +17,13 @@ impl Inverter {
         addr: std::net::IpAddr,
         port: u16,
         timeout: std::time::Duration,
-    ) -> std::io::Result<Self> {
+    ) -> anyhow::Result<Self> {
         Ok(Inverter {
             device: SolarmanDevice::new(addr, port, timeout)?,
         })
     }
 
-    pub fn get_data(&mut self) -> std::io::Result<MonitoringData> {
+    pub fn get_data(&mut self) -> anyhow::Result<MonitoringData> {
         let resp_frame = self
             .device
             .send_modbus_frame(&[0x1, 0x3, 0x0, 0x3b, 0x0, 0x36, 0xb4, 0x11])?;

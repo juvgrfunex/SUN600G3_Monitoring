@@ -100,7 +100,10 @@ fn run_monitoring(
             std::time::Duration::from_secs(monitoring_config.timeout_secs.into()),
         ) {
             Ok(inv) => break inv,
-            Err(e) => log::debug!("[{inverter_name}] Failed to connect ({e})"),
+            Err(e) => {
+		log::debug!("[{inverter_name}] Failed to connect to {}:{} ({e})",inverter_cfg.ip, inverter_cfg.port);
+		std::thread::sleep(std::time::Duration::from_millis(5000));
+		}
         }
 
     };
